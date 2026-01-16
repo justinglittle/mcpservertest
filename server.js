@@ -9,28 +9,13 @@ import { config } from "./config.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const server = new Server(
-  {
-    name: config.serverName,
-    version: config.serverVersion,
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  }
-);
+/**
+ * Load tools from ./tools
+ * Each tool must export:
+ *   export function tool(config) { return { name, description, inputSchema, handler } }
+ */
+const tools = [];
 
-// Startup validation: ensure registerTool is available
-if (typeof server.registerTool !== "function") {
-  console.error(
-    "Fatal error: server.registerTool() is not available. " +
-    "Check your @modelcontextprotocol/sdk version."
-  );
-  process.exit(1);
-}
-
-// Auto-load tools
 const toolsDir = path.join(__dirname, "tools");
 const toolFiles = fs.readdirSync(toolsDir).filter(f => f.endsWith(".js"));
 
@@ -38,13 +23,30 @@ for (const file of toolFiles) {
   const modulePath = path.join(toolsDir, file);
   const module = await import(modulePath);
 
-  if (typeof module.register === "function") {
-    module.register(server, config);
-    console.log(`✔ Loaded utility: ${file}`);
+  if (typeof module.tool === "function") {
+    const toolDef = module.tool(config);
+
+    if (!toolDef?.name || !toolDef?.handler) {
+      console.warn(`⚠ Skipped ${file} (invalid tool definition)`);
+      continue;
+    }
+
+    tools.push(toolDef);
+    console.log(`✔ Loaded utility: ${toolDef.name}`);
   } else {
-    console.warn(`⚠ Skipped ${file} (no register() export)`);
+    console.warn(`⚠ Skipped ${file} (no tool() export)`);
   }
 }
+
+const server = new Server(
+  {
+    name: config.serverName,
+    version: config.serverVersion,
+  },
+  {
+    tools
+  }
+);
 
 // Connect MCP transport (stdio)
 const transport = new StdioServerTransport();
