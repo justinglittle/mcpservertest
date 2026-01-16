@@ -9,7 +9,6 @@ import { config } from "./config.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create MCP server
 const server = new Server(
   {
     name: config.serverName,
@@ -21,6 +20,15 @@ const server = new Server(
     },
   }
 );
+
+// Startup validation: ensure registerTool is available
+if (typeof server.registerTool !== "function") {
+  console.error(
+    "Fatal error: server.registerTool() is not available. " +
+    "Check your @modelcontextprotocol/sdk version."
+  );
+  process.exit(1);
+}
 
 // Auto-load tools
 const toolsDir = path.join(__dirname, "tools");
@@ -38,6 +46,6 @@ for (const file of toolFiles) {
   }
 }
 
-// Start MCP transport
+// Connect MCP transport (stdio)
 const transport = new StdioServerTransport();
 await server.connect(transport);
