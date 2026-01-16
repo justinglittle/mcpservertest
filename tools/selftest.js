@@ -5,15 +5,10 @@ export function tool() {
     name: "self_test",
     description: "Basic health check tool that returns OK",
     inputSchema: z.object({}),
-    handler: async () => {
-      return {
-        content: [
-          {
-            type: "text",
-            text: "✅ MCP server is alive and responding!",
-          },
-        ],
-      };
-    },
+    handler: async () => ({
+      content: [
+        { type: "text", text: "✅ MCP server is alive and responding!" }
+      ]
+    })
   };
 }
