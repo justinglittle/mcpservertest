@@ -3,7 +3,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 import { config } from "./config.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +21,10 @@ const toolFiles = fs.readdirSync(toolsDir).filter(f => f.endsWith(".js"));
 
 for (const file of toolFiles) {
   const modulePath = path.join(toolsDir, file);
-  const module = await import(modulePath);
+
+  // ✅ ESM-safe dynamic import
+  const moduleUrl = pathToFileURL(modulePath).href;
+  const module = await import(moduleUrl);
 
   if (typeof module.tool === "function") {
     const toolDef = module.tool(config);
