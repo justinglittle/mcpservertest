@@ -1,14 +1,15 @@
 import { z } from "zod";
 
-export function register(server, config) {
+export function tool(config) {
   const sides = config.dice.defaultSides;
 
-  server.registerTool({
+  return {
     name: "roll_d6",
     description: "Roll a 6-sided dice",
     inputSchema: z.object({}),
     handler: async () => {
       const roll = Math.floor(Math.random() * sides) + 1;
+
       return {
         content: [
           {
@@ -18,5 +19,5 @@ export function register(server, config) {
         ],
       };
     },
-  });
+  };
 }
