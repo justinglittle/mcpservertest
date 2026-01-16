@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-export function register(server) {
-  server.registerTool({
+export function tool() {
+  return {
     name: "self_test",
     description: "Basic health check tool that returns OK",
     inputSchema: z.object({}),
@@ -15,5 +15,5 @@ export function register(server) {
         ],
       };
     },
-  });
+  };
 }
