@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  utilities-mcp:
+    build: .
+    image: utilities-mcp:latest
+    container_name: utilities-mcp
+    stdin_open: true
+    tty: false
+    environment:
+      MCP_SERVER_NAME: "utilities-mcp"
+      MCP_SERVER_VERSION: "1.1.0"
+      DICE_DEFAULT_SIDES: "6"
+    restart: "no"
